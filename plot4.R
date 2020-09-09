@@ -1,0 +1,61 @@
+library(ggplot2)
+library(tidyverse)
+setwd("~/Documents/GitHub/Exploratory_Data_Assignment_1")
+
+##Download files
+FileUrl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+download.file(FileUrl, destfile = "household_power_consumption.zip" , method="curl") 
+unzip("household_power_consumption.zip", overwrite = T)
+PowerData <- read.table("./household_power_consumption.txt", header=TRUE, sep=";", 
+                        na.strings = "?", colClasses = c('character','character','numeric',
+                                                         'numeric','numeric','numeric','numeric','numeric','numeric'))
+
+##Read data into R for processing, give classes to all columns
+PowerData <- read.table("household_power_consumption.txt", header=TRUE, sep=";", 
+                        na.strings = "?", colClasses = c('character','character','numeric',
+                                                         'numeric','numeric','numeric','numeric','numeric','numeric'))
+
+##Subset only Feb 1st and 2nd in 2007
+PowerData$Date <- as.Date(PowerData$Date, "%d/%m/%Y")
+PowerData2 <- subset(PowerData, Date >= as.Date("2007-2-1") & Date <= as.Date("2007-2-2"))
+PowerData2 <- PowerData2[complete.cases(PowerData2), ]
+
+##Create and name new vector with date and times merged
+dateTime <- paste(PowerData2$Date, PowerData2$Time)
+dateTime <- setNames(dateTime, "DateTime")
+
+##Remove Date and Time columns
+PowerData3 <- PowerData2[ ,!(names(PowerData2) %in% c("Date","Time"))]
+
+##Bind the columns together
+FinalData <- cbind(dateTime, PowerData3)
+names(FinalData)[1] <- "Date_with_Time"
+
+## Convert data from Character vector to POSIXct and POSIXlt format
+FinalData$Date_with_Time <- as.POSIXct(dateTime)
+
+##Create Plot #4 
+
+par(mfrow = c(2,2), mar=c(4,4,2,1), oma=c(0,0,2,0))
+with(FinalData, {
+##Plot #1
+        plot(Date_with_Time, Global_active_power, 
+             ylab = "Global Active Power (kilowatts)", xlab = "", type = "l")
+##Plot #2
+        plot(Voltage ~ Date_with_Time, type="l", 
+             ylab="Voltage (volt)", xlab="")
+##Plot #3
+        plot(Sub_metering_1~ Date_with_Time, 
+             ylab = "Energy sub metering", xlab = "", type = "l", col = "black")
+        lines(Sub_metering_2 ~ Date_with_Time, col = "red")
+        lines(Sub_metering_3 ~ Date_with_Time, col = "blue")
+        legend("topright", col = c("black", "red", "blue"), lwd=c(1,1,1),
+               c ("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
+##Plot #4
+        plot(FinalData$Date_with_Time, FinalData$Global_reactive_power, 
+             ylab = "Global Reactive Power (kilowatts)", xlab = "", type = "l")
+})
+
+##Save File and 
+dev.copy(png,"plot4.png", width=480, height=480)
+dev.off()

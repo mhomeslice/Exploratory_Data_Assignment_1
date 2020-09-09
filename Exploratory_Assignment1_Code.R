@@ -1,16 +1,14 @@
  library(ggplot2)
  library(tidyverse)
- setwd("~/Documents/GitHub/ExploratoryDataAnalysis")
+ setwd("~/Documents/GitHub/Exploratory_Data_Assignment_1")
  
 ##Download files
- FileUrl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
-downloadFile <- "./Data/household_power_consumption.zip"
-DataFile <- "./Data/household_power_consumption.txt"
-##
-if (!file.exists(DataFile)) {
-        download.file(FileUrl, downloadFile, method = "curl")
-        unzip(downloadFile, overwrite = T, exdir = "./Data")
-}
+FileUrl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+download.file(FileUrl, destfile = "household_power_consumption.zip" , method="curl") 
+unzip("household_power_consumption.zip", overwrite = T)
+PowerData <- read.table("./household_power_consumption.txt", header=TRUE, sep=";", 
+        na.strings = "?", colClasses = c('character','character','numeric',
+        'numeric','numeric','numeric','numeric','numeric','numeric'))
 
 ##Read data into R for processing, give classes to all columns
 PowerData <- read.table("household_power_consumption.txt", header=TRUE, sep=";", 
@@ -36,13 +34,6 @@ names(FinalData)[1] <- "Date_with_Time"
 ## Convert data from Character vector to POSIXct and POSIXlt format
 FinalData$Date_with_Time <- as.POSIXct(dateTime)
 
-hist(FinalData$Global_active_power, main="Global Active Power", 
-     xlab = "Global Active Power (kilowatts)",  col="red")
-
-
-## Convert data from Character vector to Date and Time
-PowerData2$Time <- strptime(PowerData2$Time, "%H:%M:%S")
-DateTime <-strptime(paste(PowerData2$Date, PowerData2$Time, sep=" "),"%d-%m-%Y %H:%M:%S")
 
 
 
